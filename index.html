@@ -1,58 +1,85 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eventi Storici</title>
-  <link rel="stylesheet" href="style.css"> <!-- Collegamento al file CSS esterno -->
-</head>
-<body>
-  <div class="container">
-    <h1>Evento Storico del Giorno</h1>
-    <p>Data odierna: <span id="dataOdierna"></span></p> <!-- Elemento per visualizzare la data odierna -->
-    <div id="evento">
-      <!-- Il contenuto verrà caricato dinamicamente qui -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eventi Storici</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Collegamento al file CSS esterno -->
+  </head>
+  <body>
+    <div class="container">
+      <h1>Evento Storico del Giorno</h1>
+      <p>Data odierna: <span id="dataOdierna"></span></p>
+      <!-- Elemento per visualizzare la data odierna -->
+      <div id="evento">
+        <!-- Il contenuto verrà caricato dinamicamente qui -->
+      </div>
     </div>
-  </div>
 
-  <script>
-    // Funzione per ottenere la data odierna nel formato "MM-DD"
-    function getDataOdierna() {
-      const oggi = new Date();
-      const mese = String(oggi.getMonth() + 1).padStart(2, '0');
-      const giorno = String(oggi.getDate()).padStart(2, '0');
-      return `${mese}-${giorno}`;
-    }
+    <script>
+      // Funzione per ottenere la data odierna nel formato "MM-DD"
+      function getDataOdierna() {
+        const oggi = new Date();
+        const mese = String(oggi.getMonth() + 1).padStart(2, "0");
+        const giorno = String(oggi.getDate()).padStart(2, "0");
+        return `${mese}-${giorno}`;
+      }
 
-    // Funzione per caricare l'evento storico corrispondente al mese e giorno odierni
-    function caricareEventoStorico() {
+      //richiamo la funzione per avere la data corrente
       const dataOdierna = getDataOdierna();
+      //la visualizzo a video
+      document.getElementById("dataOdierna").textContent = dataOdierna;
 
-      // Visualizza la data odierna
-      document.getElementById('dataOdierna').textContent = dataOdierna;
+      //funzione lanciata all'avvio della pagina per ricercare l'evento del giorno
+      function caricareEventoStorico() {
+        //creo un'intestazione formato json per la post
+        const myHeader = new Headers();
+        myHeader.append("Content-type", "application/json");
+        
+        //variabili odierne
+        const [meseOdierno, giornoOdierno] = getDataOdierna().split('-');
 
-      // Eseguire una richiesta HTTP GET per ottenere l'evento storico
-      fetch(`/api/evento?data=${dataOdierna}`, {
-        method: 'GET'
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Errore nel caricamento dell\'evento storico.');
-          }
-          return response.json();
+        //creo il body della richiesta post
+        const raw = JSON.stringify({
+          mese: meseOdierno,
+          giorno: giornoOdierno
         })
-        .then(data => {
-          console.log('Dati ricevuti:', data); // Aggiunto per debug
-          const eventoDiv = document.getElementById('evento');
-          eventoDiv.textContent = data.evento;
-        })
-        .catch(error => {
-          console.error('Si è verificato un errore:', error);
-        });
-    }
 
-    // Chiamare la funzione per caricare l'evento storico all'avvio della pagina
-    window.onload = caricareEventoStorico;
-  </script>
-</body>
+        //scrivo le opzioni della richiesta
+        const requestOptions = {
+          method: "POST",
+          headers: myHeader,
+          body: raw,
+          redirect: "follow",
+        }
+
+        // Eseguire una richiesta HTTP POST per ottenere l'evento storico
+        fetch("http://localhost:3000/evento", requestOptions)
+          .then((response) => {
+            //se la risposta del server è negativa
+            if (!response.ok) {
+              throw new Error("Errore nel caricamento dell'evento storico.");
+            }
+            // se la risposta del server è positiva 
+            return response.json();
+          })
+          //leggo i dati della risposta del server
+          .then((results) => {
+            // Aggiunto per debug, controllo la riposta del server
+            console.log("Dati ricevuti:", results); 
+            //la stampo a video
+            const eventoDiv = document.getElementById("evento");
+            eventoDiv.innerHTML = results.evento;
+          })
+          //se avviene un errore nella richiesta
+          .catch((error) => {
+            console.error("Si è verificato un errore:", error);
+          });
+      };
+
+      // Chiamare la funzione per caricare l'evento storico all'avvio della pagina
+      window.onload = caricareEventoStorico();
+    </script>
+  </body>
 </html>
