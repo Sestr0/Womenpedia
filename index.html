@@ -15,6 +15,12 @@
       <div id="evento">
         <!-- Il contenuto verrà caricato dinamicamente qui -->
       </div>
+      <div>
+        <button onclick="scopriDiPiu()">Scopri di più</button>
+      </div>
+      <div id="chatBot">
+        <!-- Qui il chatBot risponderà alle tue curiosità -->
+      </div>
     </div>
 
     <script>
@@ -36,15 +42,15 @@
         //creo un'intestazione formato json per la post
         const myHeader = new Headers();
         myHeader.append("Content-type", "application/json");
-        
+
         //variabili odierne
-        const [meseOdierno, giornoOdierno] = getDataOdierna().split('-');
+        const [meseOdierno, giornoOdierno] = getDataOdierna().split("-");
 
         //creo il body della richiesta post
         const raw = JSON.stringify({
           mese: meseOdierno,
-          giorno: giornoOdierno
-        })
+          giorno: giornoOdierno,
+        });
 
         //scrivo le opzioni della richiesta
         const requestOptions = {
@@ -52,7 +58,7 @@
           headers: myHeader,
           body: raw,
           redirect: "follow",
-        }
+        };
 
         // Eseguire una richiesta HTTP POST per ottenere l'evento storico
         fetch("http://localhost:3000/evento", requestOptions)
@@ -61,13 +67,13 @@
             if (!response.ok) {
               throw new Error("Errore nel caricamento dell'evento storico.");
             }
-            // se la risposta del server è positiva 
+            // se la risposta del server è positiva
             return response.json();
           })
           //leggo i dati della risposta del server
           .then((results) => {
             // Aggiunto per debug, controllo la riposta del server
-            console.log("Dati ricevuti:", results); 
+            console.log("Dati ricevuti:", results);
             //la stampo a video
             const eventoDiv = document.getElementById("evento");
             eventoDiv.innerHTML = results.evento;
@@ -76,8 +82,43 @@
           .catch((error) => {
             console.error("Si è verificato un errore:", error);
           });
-      };
+      }
 
+      function scopriDiPiu() {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        const raw = JSON.stringify({
+          question: document.getElementById("evento").textContent,
+        });
+
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+          redirect: "follow",
+        };
+
+        fetch("http://localhost:3000/chat", requestOptions)
+        .then((response) => {
+            //se la risposta del server è negativa
+            if (!response.ok) {
+              throw new Error("Errore nel caricamento dell'evento storico.");
+            }
+            // se la risposta del server è positiva
+            return response.json();
+          })
+          .then((results) => {
+            // Aggiunto per debug, controllo la riposta del server
+            console.log("Dati ricevuti:", results.response);
+            //la stampo a video
+            const chatBot = document.getElementById("chatBot");
+            chatBot.innerHTML = results.response;
+          })
+          .catch((error) => {
+            console.error("Si è verificato un errore:", error);
+          });
+      }
       // Chiamare la funzione per caricare l'evento storico all'avvio della pagina
       window.onload = caricareEventoStorico();
     </script>
