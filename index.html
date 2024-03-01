@@ -86,6 +86,11 @@
     }
 
     function scopriDiPiu() {
+      const button = document.querySelector('button');
+
+  button.addEventListener('click', function() {
+  this.classList.add('clicked'); // Aggiunge la classe "clicked" al bottone al click
+});
       const myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
 

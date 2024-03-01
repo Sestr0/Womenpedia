@@ -1,27 +1,53 @@
 body {
-    font-family: Arial, sans-serif;
-    font-style: italic;
-    margin: 0;
-    padding: 0;
-    background: linear-gradient(to bottom, #ffffff, #f0f0f0);
-  }
-  .container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  h1 {
-    text-align: center;
-    color: #333;
-  }
-  #evento {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
+  font-family: 'Courier New', monospace; /* Monospace font for an attractive look[1][5][9] */
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 2px solid #800080; /* Base purple[2] */
   
+}
+
+h1 {
+  text-align: center;
+  color: #4B0082; /* Indigo for contrast[2] */
+  font-family: 'Lucida Console', monospace; /* Specific monospace font for headings[1] */
+}
+
+#evento, #chatBot {
+  margin-top: 20px;
+  padding: 50px;
+  background-color: #F0E6F0;
+  border: 1px solid #800080; /* Base purple for borders[2] */
+}
+
+
+#chatBot {
+  margin-top: 50px; /* Aumento dello spazio sopra il chatbot */
+  padding: 150px; /* Aumento delle dimensioni del chatbot */
+}
+
+button {
+  font-family: 'Lucida Console', monospace;
+  background-color: #9370DB; /* Lavender - Tonalità di viola più delicata */  
+  color: white;
+  border: none;
+  padding: 30px 300px; /* Aumento delle dimensioni del bottone */
+  cursor: pointer;
+  transition: background-color 0.3s; /* Transizione graduale del colore */
+  display: block; /* Per separare il pulsante dal div precedente */
+  margin: 10px auto; /* Per centrare il pulsante e posizionarlo più vicino al riquadro "evento" */
+}
+
+button:hover {
+  background-color: #9370DB; /* Medium Purple - Cambio di colore al passaggio del cursore */
+}
+button.clicked {
+  background-color: gray; /* Blue Violet[2] - Cambio di colore al click */
+  pointer-events: none; /* Disabilita il clic successivo */
+}
+
