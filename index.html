@@ -18,6 +18,17 @@
       <div>
         <button onclick="scopriDiPiu()">Scopri di più</button>
       </div>
+      <div id="stopWatch">
+        <!-- Cronometro la risposta -->
+        <div class="cronometro"></div>
+        <div class="cronometro"></div>
+        :
+        <div class="cronometro"></div>
+        <div class="cronometro"></div>
+        :
+        <div class="cronometro"></div>
+        <div class="cronometro"></div>
+      </div>
       <div id="chatBot">
         <!-- Qui il chatBot risponderà alle tue curiosità -->
       </div>
@@ -32,27 +43,36 @@
         return `${mese}-${giorno}`;
       }
 
-      //richiamo la funzione per avere la data corrente
+      // Richiamo la funzione per avere la data corrente e la visualizzo a video
       const dataOdierna = getDataOdierna();
-      //la visualizzo a video
       document.getElementById("dataOdierna").textContent = dataOdierna;
 
-      //funzione lanciata all'avvio della pagina per ricercare l'evento del giorno
+      // Funzione per scrivere progressivamente il testo
+      function typewriter(text, element) {
+        let i = 0;
+        const speed = 50; // Velocità della scrittura (in millisecondi)
+        const interval = setInterval(function () {
+          if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+          } else {
+            clearInterval(interval); // Ferma l'intervallo quando tutto il testo è stato scritto
+          }
+        }, speed);
+      }
+
+      // Funzione lanciata all'avvio della pagina per ricercare l'evento del giorno
       function caricareEventoStorico() {
-        //creo un'intestazione formato json per la post
         const myHeader = new Headers();
         myHeader.append("Content-type", "application/json");
 
-        //variabili odierne
         const [meseOdierno, giornoOdierno] = getDataOdierna().split("-");
 
-        //creo il body della richiesta post
         const raw = JSON.stringify({
           mese: meseOdierno,
           giorno: giornoOdierno,
         });
 
-        //scrivo le opzioni della richiesta
         const requestOptions = {
           method: "POST",
           headers: myHeader,
@@ -60,36 +80,34 @@
           redirect: "follow",
         };
 
-        // Eseguire una richiesta HTTP POST per ottenere l'evento storico
         fetch("http://localhost:3000/evento", requestOptions)
           .then((response) => {
-            //se la risposta del server è negativa
             if (!response.ok) {
               throw new Error("Errore nel caricamento dell'evento storico.");
             }
-            // se la risposta del server è positiva
             return response.json();
           })
-          //leggo i dati della risposta del server
           .then((results) => {
-            // Aggiunto per debug, controllo la riposta del server
-            console.log("Dati ricevuti:", results);
-            //la stampo a video
+            console.log(results);
             const eventoDiv = document.getElementById("evento");
             eventoDiv.innerHTML = results.evento;
           })
-          //se avviene un errore nella richiesta
           .catch((error) => {
             console.error("Si è verificato un errore:", error);
           });
       }
 
       function scopriDiPiu() {
+        const button = document.querySelector("button");
+        button.classList.add("clicked"); // Aggiunge la classe "clicked" al bottone al click
+
+        button.addEventListener("click", startStopwatch())
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
+        const eventText = document.getElementById("evento").textContent;
         const raw = JSON.stringify({
-          question: document.getElementById("evento").textContent,
+          question: eventText,
         });
 
         const requestOptions = {
@@ -100,26 +118,74 @@
         };
 
         fetch("http://localhost:3000/chat", requestOptions)
-        .then((response) => {
-            //se la risposta del server è negativa
+          .then((response) => {
+            startStopwatch();
             if (!response.ok) {
               throw new Error("Errore nel caricamento dell'evento storico.");
             }
-            // se la risposta del server è positiva
             return response.json();
           })
           .then((results) => {
-            // Aggiunto per debug, controllo la riposta del server
-            console.log("Dati ricevuti:", results.response);
-            //la stampo a video
             const chatBot = document.getElementById("chatBot");
-            chatBot.innerHTML = results.response;
+            chatBot.innerHTML = ""; // Pulisci il contenuto precedente prima di aggiungere il testo
+            typewriter(results.response, chatBot); // Usa la funzione typewriter per scrivere il testo progressivamente
           })
           .catch((error) => {
             console.error("Si è verificato un errore:", error);
           });
       }
-      // Chiamare la funzione per caricare l'evento storico all'avvio della pagina
+
+      var centesimiStopwatch = 0,
+        secondiStopwatch = 0,
+        minutiStopwatch = 0;
+      var stopwatchStatus = false;
+      function startStopwatch() {
+        stopwatchStatus = !stopwatchStatus;
+      }
+      function restartStopwatch() {
+        stopwatchStatus = false;
+        minutiStopwatch = 0;
+        secondiStopwatch = 0;
+        centesimiStopwatch = 0;
+      }
+      setInterval(function () {
+        if (stopwatchStatus == true) {
+          centesimiStopwatch++;
+        }
+        if (centesimiStopwatch > 99) {
+          centesimiStopwatch = 0;
+          secondiStopwatch++;
+        }
+        if (secondiStopwatch > 59) {
+          secondiStopwatch = 0;
+          minutiStopwatch++;
+        }
+        var cronometro1 = document.querySelector(".cronometro:nth-child(1)");
+        var cronometro2 = document.querySelector(".cronometro:nth-child(2)");
+        var cronometro3 = document.querySelector(".cronometro:nth-child(3)");
+        var cronometro4 = document.querySelector(".cronometro:nth-child(4)");
+        var cronometro5 = document.querySelector(".cronometro:nth-child(5)");
+        var cronometro6 = document.querySelector(".cronometro:nth-child(6)");
+
+        cronometro1.innerHTML =
+          minutiStopwatch > 9 ? minutiStopwatch.toString()[0] : "0";
+        cronometro2.innerHTML =
+          minutiStopwatch < 10
+            ? minutiStopwatch.toString()[0]
+            : minutiStopwatch.toString()[1];
+        cronometro3.innerHTML =
+          secondiStopwatch > 9 ? secondiStopwatch.toString()[0] : "0";
+        cronometro4.innerHTML =
+          secondiStopwatch < 10
+            ? secondiStopwatch.toString()[0]
+            : secondiStopwatch.toString()[1];
+        cronometro5.innerHTML =
+          centesimiStopwatch > 9 ? centesimiStopwatch.toString()[0] : "0";
+        cronometro6.innerHTML =
+          centesimiStopwatch < 10
+            ? centesimiStopwatch.toString()[0]
+            : centesimiStopwatch.toString()[1];
+      }, 10);
       window.onload = caricareEventoStorico();
     </script>
   </body>
