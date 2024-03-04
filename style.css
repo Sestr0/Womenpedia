@@ -46,8 +46,17 @@ button {
 button:hover {
   background-color: #9370DB; /* Medium Purple - Cambio di colore al passaggio del cursore */
 }
-button.clicked {
+.clicked {
   background-color: gray; /* Blue Violet[2] - Cambio di colore al click */
   pointer-events: none; /* Disabilita il clic successivo */
+}
+.cronometro {
+  font-family: 'Lucida Console', monospace; /* Consistent font for the stopwatch */
+  color: white; /* For contrast against the background */
+  background-color: #9370DB; /* A lighter shade of purple for the background */
+  border: 2px solid #800080; /* Base purple for the border */
+  padding: 10px; /* Adequate padding for readability */
+  margin: 2px; /* Small margin between digits */
+  display: inline-block; /* Display digits inline */
 }
 

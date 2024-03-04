@@ -35,26 +35,40 @@ connection.connect((err) => {
 });
 
 app.post("/evento", (req, res) => {
+  //leggo la data inviata dalla post del client
   const data = req.body;
+  //la stampo sul terminale
+  console.log(data);
 
+  //query di selezione
   connection.query(
-    "SELECT * FROM data_storica WHERE SUBSTRING (data, 6, 2) = ? AND SUBSTRING(data, 9, 2) = ?",
-    [data.mese, data.giorno],
+    "SELECT * FROM data_storica WHERE SUBSTRING (data, 6, 2) = '" +
+      data.mese +
+      "' AND SUBSTRING(data, 9, 2) = '" +
+      data.giorno +
+      "'",
     (error, results) => {
+      //caso di errore
       if (error) {
         console.error("Errore durante l'esecuzione della query");
-        res.status(500).send("Errore durante il caricamento dati");
+        res.status(500).send("Errore durante il carimento dati");
         return;
       }
-      
+      //se fosse andata a buon fine...
+      //stampo i risultati sul terminale
+      console.log(results);
+      //se la query restituisce qualcosa...
       if (results.length > 0) {
-        const num = Math.floor(Math.random() * results.length);
+        const num = Math.floor(Math.random() * results.length); // Genera un numero casuale compreso tra 0 e la lunghezza dell'array dei risultati
+        //invio la risposta
         res.status(200).send({
           evento: results[num].evento,
           id: results[num].id,
           data: results[num].data,
         });
-      } else {
+        return;
+      } //se la query non restituisce nulla
+      else {
         res.status(200).send({
           evento: "Non esiste un evento registrato per questa data.",
           id: null,
@@ -65,28 +79,30 @@ app.post("/evento", (req, res) => {
   );
 });
 
+// Endpoint per gestire la richiesta POST della domanda al chatbot
 app.post("/chat", async (req, res) => {
   try {
-    const question = req.body.question;
-
+    const question = req.body.question; // Legge la domanda dal corpo della richiesta
     if (question == "Non esiste un evento registrato per questa data.") {
       res.json({
-        response: "Non posso fornire ulteriori informazioni di un evento non fornito",
+        response: "Non posso fornire ulteriori informazioni di un evento non fornito", // Risposta del chatbot
       });
       return;
     }
-
+    // Invia una richiesta al servizio di completamento della chat di OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-3.5-turbo", // Specifica il modello da utilizzare
       messages: [
-        { role: "user", content: `Utente: ${question}` },
+        { role: "user", content: `Utente: ${question}` }, // Aggiunge il messaggio dell'utente al contesto della chat
       ],
     });
 
+    // Restituisci la risposta come JSON con maggiore dettaglio sull'input dell'utente
     res.json({
-      response: completion.choices[0].message.content,
+      response: completion.choices[0].message.content, // Risposta del chatbot
     });
   } catch (error) {
+    // Gestisce eventuali errori durante l'elaborazione della richiesta
     console.error("Errore durante l'elaborazione della richiesta:", error);
     res
       .status(500)
@@ -94,6 +110,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
+// Avvia il server sulla porta specificata
 app.listen(PORT, () => {
   console.log(`Server in ascolto sulla porta ${PORT}`);
 });
